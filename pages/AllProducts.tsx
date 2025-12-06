@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Product, SortOption } from '../types.ts';
 import ProductCard from '../components/ProductCard.tsx';
@@ -10,11 +11,14 @@ interface AllProductsProps {
   onClearSearch: () => void;
   allCategories: string[];
   allProvinces: string[];
+  allProducers: string[];
   selectedCategories: string[];
   selectedProvinces: string[];
+  selectedProducers: string[];
   sortOption: SortOption;
   onCategoryChange: (categories: string[]) => void;
   onProvinceChange: (provinces: string[]) => void;
+  onProducerChange: (producers: string[]) => void;
   onSortChange: (sort: SortOption) => void;
 }
 
@@ -26,11 +30,14 @@ export const AllProducts: React.FC<AllProductsProps> = ({
   onClearSearch,
   allCategories,
   allProvinces,
+  allProducers,
   selectedCategories,
   selectedProvinces,
+  selectedProducers,
   sortOption,
   onCategoryChange,
   onProvinceChange,
+  onProducerChange,
   onSortChange
 }) => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -49,116 +56,155 @@ export const AllProducts: React.FC<AllProductsProps> = ({
     onProvinceChange(newSelection);
   };
 
+  const handleProducerChange = (producer: string) => {
+    const newSelection = selectedProducers.includes(producer)
+      ? selectedProducers.filter(p => p !== producer)
+      : [...selectedProducers, producer];
+    onProducerChange(newSelection);
+  };
+
   const FilterSidebar: React.FC = () => (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 text-gray-800 font-bold text-lg pb-4 border-b border-gray-200">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+        ตัวกรองค้นหา
+      </div>
+
       <div>
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 border-b border-gray-200 pb-2">หมวดหมู่สินค้า</h3>
+        <h3 className="text-sm font-bold mb-3 text-gray-800 uppercase tracking-wide">หมวดหมู่สินค้า</h3>
         <div className="space-y-2">
           {allCategories.map(category => (
-            <label key={category} className="flex items-center space-x-3 cursor-pointer">
+            <label key={category} className="flex items-center space-x-3 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={selectedCategories.includes(category)}
                 onChange={() => handleCategoryChange(category)}
-                className="h-4 w-4 rounded border-gray-300 bg-white text-red-600 focus:ring-red-500"
+                className="h-4 w-4 rounded border-gray-300 bg-white text-cyan-600 focus:ring-cyan-500"
               />
-              <span className="text-gray-700">{category}</span>
+              <span className="text-gray-600 group-hover:text-cyan-600 transition-colors text-sm">{category}</span>
             </label>
           ))}
         </div>
       </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 border-b border-gray-200 pb-2">จังหวัด</h3>
+      <div className="border-t border-gray-100 pt-4">
+        <h3 className="text-sm font-bold mb-3 text-gray-800 uppercase tracking-wide">จังหวัด</h3>
         <div className="space-y-2">
           {allProvinces.map(province => (
-            <label key={province} className="flex items-center space-x-3 cursor-pointer">
+            <label key={province} className="flex items-center space-x-3 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={selectedProvinces.includes(province)}
                 onChange={() => handleProvinceChange(province)}
-                className="h-4 w-4 rounded border-gray-300 bg-white text-red-600 focus:ring-red-500"
+                className="h-4 w-4 rounded border-gray-300 bg-white text-cyan-600 focus:ring-cyan-500"
               />
-              <span className="text-gray-700">{province}</span>
+              <span className="text-gray-600 group-hover:text-cyan-600 transition-colors text-sm">{province}</span>
             </label>
           ))}
         </div>
       </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3 text-gray-900">เรียงตาม</h3>
-        <select
-          value={sortOption}
-          onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:border-red-500 focus:ring-red-500"
-        >
-          <option value="default">ค่าเริ่มต้น</option>
-          <option value="price-asc">ราคา: น้อยไปมาก</option>
-          <option value="price-desc">ราคา: มากไปน้อย</option>
-        </select>
+      <div className="border-t border-gray-100 pt-4">
+        <h3 className="text-sm font-bold mb-3 text-gray-800 uppercase tracking-wide">ผู้ผลิต</h3>
+        <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+          {allProducers.map(producer => (
+            <label key={producer} className="flex items-center space-x-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={selectedProducers.includes(producer)}
+                onChange={() => handleProducerChange(producer)}
+                className="h-4 w-4 rounded border-gray-300 bg-white text-cyan-600 focus:ring-cyan-500"
+              />
+              <span className="text-gray-600 group-hover:text-cyan-600 transition-colors text-sm truncate">{producer}</span>
+            </label>
+          ))}
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">สินค้าทั้งหมด</h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">เลือกซื้อผลิตภัณฑ์จากภูมิปัญญาไทยที่คัดสรรมาอย่างดีจากทั่วประเทศ</p>
+    <div className="bg-gray-100 min-h-screen pb-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Breadcrumb style header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+            <h1 className="text-2xl font-bold text-gray-800">สินค้าทั้งหมด <span className="text-base font-normal text-gray-500 ml-2">({products.length} รายการ)</span></h1>
+            
+            {/* Sorting - Marketplace Style */}
+            <div className="flex items-center space-x-2 text-sm bg-white p-2 rounded shadow-sm">
+                <span className="text-gray-500 mr-2 hidden sm:inline">เรียงตาม:</span>
+                <button 
+                    onClick={() => onSortChange('default')}
+                    className={`px-4 py-1.5 rounded transition-colors ${sortOption === 'default' ? 'bg-cyan-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                >
+                    เกี่ยวข้อง
+                </button>
+                 <button 
+                    onClick={() => onSortChange('price-asc')}
+                    className={`px-4 py-1.5 rounded transition-colors ${sortOption === 'price-asc' ? 'bg-cyan-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                >
+                    ราคาต่ำสุด
+                </button>
+                 <button 
+                    onClick={() => onSortChange('price-desc')}
+                    className={`px-4 py-1.5 rounded transition-colors ${sortOption === 'price-desc' ? 'bg-cyan-600 text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                >
+                    ราคาสูงสุด
+                </button>
+            </div>
         </div>
 
-        <div className="lg:grid lg:grid-cols-4 lg:gap-8">
-            <aside className="hidden lg:block bg-gray-50 p-6 rounded-lg border border-gray-200">
+        <div className="lg:grid lg:grid-cols-4 lg:gap-6 items-start">
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:block bg-white p-5 rounded shadow-sm sticky top-24">
               <FilterSidebar />
             </aside>
 
-            <main className="lg:col-span-3">
-              <div className="flex justify-between items-center mb-6 lg:hidden">
-                  <h2 className="text-lg font-medium text-gray-900">ตัวกรอง</h2>
-                  <button onClick={() => setIsFiltersOpen(!isFiltersOpen)} className="p-2 text-gray-500 hover:text-gray-900">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-4">
+                 <button onClick={() => setIsFiltersOpen(!isFiltersOpen)} className="w-full bg-white p-3 rounded shadow-sm flex items-center justify-center text-cyan-600 font-medium">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                       </svg>
+                      ตัวกรอง & หมวดหมู่
                   </button>
-              </div>
+                  {isFiltersOpen && (
+                    <div className="bg-white p-4 rounded mt-2 shadow-sm border border-gray-100">
+                        <FilterSidebar />
+                    </div>
+                  )}
+            </div>
 
-              {isFiltersOpen && (
-                <div className="bg-gray-50 p-4 rounded-lg mb-6 lg:hidden border border-gray-200">
-                    <FilterSidebar />
-                </div>
-              )}
-
+            <main className="lg:col-span-3">
               {searchQuery && (
-                <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+                <div className="bg-white border-l-4 border-cyan-500 p-4 mb-4 shadow-sm flex items-center justify-between">
                     <div>
                         <span className="text-gray-600">ผลการค้นหาสำหรับ:</span>
-                        <strong className="text-red-600 font-semibold ml-2">"{searchQuery}"</strong>
+                        <strong className="text-gray-900 font-bold ml-2">"{searchQuery}"</strong>
                     </div>
-                    <button onClick={onClearSearch} className="text-sm font-medium text-red-500 hover:text-red-400 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
+                    <button onClick={onClearSearch} className="text-sm font-medium text-red-500 hover:text-red-700 underline">
                         ล้างการค้นหา
                     </button>
                 </div>
               )}
 
               {products.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {products.map(product => (
                     <ProductCard key={product.id} product={product} onSelect={onSelectProduct} onQuickView={onQuickView} />
                     ))}
                 </div>
               ) : (
-                <div className="text-center py-16 bg-gray-100 rounded-lg">
-                    <h3 className="text-xl font-semibold text-gray-800">ไม่พบสินค้าที่ตรงกัน</h3>
-                    <p className="text-gray-600 mt-2">{searchQuery ? 'ลองใช้คำค้นหาอื่น' : 'ลองปรับเปลี่ยนตัวกรองของคุณ'}</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-white rounded shadow-sm">
+                    <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <h3 className="text-lg font-medium text-gray-900">ไม่พบสินค้าที่คุณค้นหา</h3>
+                    <p className="text-gray-500 mt-1">ลองเปลี่ยนคำค้นหา หรือล้างตัวกรองทั้งหมด</p>
+                    <button onClick={onClearSearch} className="mt-4 text-cyan-600 hover:underline">ดูสินค้าทั้งหมด</button>
                 </div>
               )}
             </main>
         </div>
-    </div>
+      </div>
     </div>
   );
 };

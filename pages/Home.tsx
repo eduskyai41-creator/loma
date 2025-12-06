@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard.tsx';
 import { Product, Page } from '../types.ts';
 
@@ -10,38 +11,36 @@ interface HomeProps {
     onCategorySelect: (category: string) => void;
 }
 
-
 const CategoryIcon: React.FC<{ name: string }> = ({ name }) => {
+    // Marketplace style simple icons
     const icons: { [key: string]: React.ReactElement } = {
         'อาหาร': (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 15.75l-9-5.25L3 15.75m18 0l-9 5.25L3 15.75m18 0V8.25l-9-5.25L3 8.25v7.5M3 15.75l9 5.25l9-5.25" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25" />
-            </svg>
+            <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            </div>
         ),
         'เครื่องแต่งกาย': (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m18 0h-1.5m-15 0a7.5 7.5 0 1115 0m-15 0H3m15 0h1.5m-1.5-9l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            </div>
         ),
         'ของใช้': (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 011.622-3.385m5.043.025a15.998 15.998 0 001.622-3.385m3.388 1.62a15.998 15.998 0 00-1.622-3.385m0 5.043a15.998 15.998 0 01-3.388-1.62m-1.622 3.385a15.998 15.998 0 01-1.622 3.385m0-5.043a15.998 15.998 0 00-1.622 3.385m7.732-4.22a15.998 15.998 0 00-3.388-1.622m0-5.043a15.998 15.998 0 003.388 1.622m-7.732 4.22a15.998 15.998 0 013.388 1.622m1.622-3.385a15.998 15.998 0 011.622-3.385m-5.043-.025a15.998 15.998 0 00-1.622-3.385" />
-            </svg>
+            <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-green-600 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+            </div>
         ),
         'ของตกแต่ง': (
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" />
-            </svg>
+             <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </div>
         ),
         'เครื่องประดับ': (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a9.75 9.75 0 01-4.874-1.954.5.5 0 01.374-.838h17a.5.5 0 01.374.838A9.75 9.75 0 0116.5 18.75z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15.75L12 3m0 0l-3 3m3-3l3 3" />
-            </svg>
+            <div className="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center text-pink-600 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
         ),
     };
-    return icons[name] || <div className="h-10 w-10" />;
+    return icons[name] || <div className="w-12 h-12 rounded-2xl bg-gray-100 mb-2" />;
 }
 
 const Home: React.FC<HomeProps> = ({ onNavigate, onSelectProduct, onQuickView, allProducts, onCategorySelect }) => {
@@ -54,123 +53,143 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onSelectProduct, onQuickView, a
         { name: 'เครื่องประดับ' },
     ];
 
-    const featuredProducts: Product[] = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 14);
+    const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
 
-    const valueProps = [
-        {
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 4v4m-2-2h4M17 3v4m-2-2h4M5 21v-4m2 2H3m14-4v4m2-2h-4" />
-                </svg>
-            ),
-            title: 'สินค้าแท้จากชุมชน',
-            description: 'เรารับประกันสินค้าทุกชิ้นส่งตรงจากผู้ผลิตและวิสาหกิจชุมชนทั่วประเทศ'
-        },
-        {
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.122-1.28-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.122-1.28.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-            ),
-            title: 'สนับสนุนเศรษฐกิจท้องถิ่น',
-            description: 'ทุกการสั่งซื้อของคุณช่วยสร้างรายได้ที่ยั่งยืนและส่งเสริมชีวิตที่ดีขึ้นของผู้คนในชุมชน'
-        },
-        {
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-            ),
-            title: 'เรื่องราวที่คัดสรร',
-            description: 'เรานำเสนอเรื่องราวเบื้องหลังผลิตภัณฑ์ เพื่อให้คุณได้สัมผัสถึงคุณค่าและภูมิปัญญาที่แท้จริง'
-        },
-    ];
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeLeft(prev => (prev > 0 ? prev - 1 : 7200));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatTime = (seconds: number) => {
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return { h, m, s };
+    };
+
+    const time = formatTime(timeLeft);
+
+    const flashSaleProducts = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 6);
+    const recommendedProducts = [...allProducts].sort(() => 0.5 - Math.random());
 
     return (
-        <>
-            {/* Hero Section */}
-            <section className="bg-gray-50">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-                    <div className="grid md:grid-cols-2 gap-8 items-center">
-                        <div className="text-center md:text-left">
-                            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
-                                <span className="block">สัมผัสคุณค่าจากมือผู้สร้างสรรค์</span>
-                                <span className="block text-red-600 mt-2">ส่งตรงจากชุมชนถึงบ้านคุณ</span>
-                            </h1>
-                            <p className="mt-6 max-w-lg mx-auto md:mx-0 text-lg text-gray-600">
-                                'ตลาดภูมิปัญญา' คือศูนย์รวมสินค้า OTOP และวิสาหกิจชุมชนไทย ที่เราคัดสรรคุณภาพและเรื่องราวมาให้คุณโดยเฉพาะ
-                            </p>
-                            <div className="mt-8 flex justify-center md:justify-start gap-4">
-                                <button onClick={() => onNavigate('all-products')} className="px-8 py-3 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 transition-colors duration-300 shadow-lg shadow-red-500/40">
-                                    เลือกซื้อสินค้า
-                                </button>
-                                <button onClick={() => onNavigate('stories')} className="px-8 py-3 bg-white text-gray-800 font-bold rounded-md hover:bg-gray-100 transition-colors duration-300 border border-gray-300">
-                                    เรื่องราวของเรา
-                                </button>
+        <div className="bg-gray-100 pb-10">
+            {/* Hero Section - Marketplace Banner Style */}
+            <section className="bg-white">
+                <div className="container mx-auto px-0 md:px-4 lg:px-8 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-auto md:h-80">
+                        {/* Main Banner */}
+                        <div className="md:col-span-2 relative rounded-none md:rounded-lg overflow-hidden bg-gray-200 group cursor-pointer" onClick={() => onNavigate('all-products')}>
+                            <img src="https://www.nairobroo.com/wp-content/uploads/2019/03/13.2B.jpg" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Main Banner" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6 md:p-10">
+                                <h2 className="text-white text-3xl font-bold mb-2">Loma Exclusive</h2>
+                                <p className="text-white/90 text-sm md:text-lg mb-4">รวมสินค้าฮาลาลคุณภาพดีที่สุด จาก 270 ผู้ประกอบการ</p>
+                                <button className="w-fit bg-red-600 text-white px-6 py-2 rounded-sm font-medium hover:bg-red-700 transition">ช้อปเลย</button>
                             </div>
                         </div>
-                        <div className="hidden md:block">
-                            <img src="https://www.nairobroo.com/wp-content/uploads/2019/03/13.2B.jpg" alt="ผ้าไหมมัดหมี่ลายจวนตานี" className="rounded-lg shadow-xl" />
+                        {/* Side Banners (Desktop only) */}
+                        <div className="hidden md:grid grid-rows-2 gap-2 h-full">
+                            <div className="relative rounded-lg overflow-hidden bg-cyan-100 cursor-pointer group" onClick={() => onCategorySelect('ของใช้')}>
+                                <img src="https://www.pattanicity.go.th/tmp/3424fd943452912b493e06f297f79bfb.jpg" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Sub Banner 1" />
+                                <div className="absolute inset-0 flex flex-col justify-center p-6 bg-black/20 hover:bg-black/10 transition-colors">
+                                    <span className="bg-yellow-400 text-xs font-bold px-2 py-0.5 rounded w-fit mb-2">แนะนำ</span>
+                                    <h3 className="text-white font-bold text-xl drop-shadow-md">ของดีปัตตานี</h3>
+                                    <p className="text-white text-sm drop-shadow-md">ส่งตรงจากแหล่งผลิต</p>
+                                </div>
+                            </div>
+                            <div className="relative rounded-lg overflow-hidden bg-orange-100 cursor-pointer group" onClick={() => onCategorySelect('อาหาร')}>
+                                <img src="https://yalapao.go.th/th/wp-content/uploads/S__46784516-768x1024.jpg" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Sub Banner 2" />
+                                <div className="absolute inset-0 flex flex-col justify-center p-6 bg-black/20 hover:bg-black/10 transition-colors">
+                                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded w-fit mb-2">FLASH DEAL</span>
+                                    <h3 className="text-white font-bold text-xl drop-shadow-md">กาแฟทุเรียน</h3>
+                                    <p className="text-white text-sm drop-shadow-md">ลดพิเศษ 50% วันนี้</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
             
-            {/* Categories Section */}
-            <section className="py-16 bg-white">
+            {/* Category Icons Grid */}
+            <section className="bg-white pt-6 pb-2 mb-4 shadow-sm">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">เลือกชมตามหมวดหมู่</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+                    <div className="grid grid-cols-5 gap-2 md:gap-8">
                         {categories.map(cat => (
-                            <button key={cat.name} onClick={() => onCategorySelect(cat.name)} className={`group flex flex-col items-center justify-center p-6 rounded-lg text-center transition-all duration-300 bg-gray-50 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-1 border border-gray-200`}>
-                                <div className="text-red-500 transition-transform duration-300 group-hover:scale-110">
+                            <button key={cat.name} onClick={() => onCategorySelect(cat.name)} className="flex flex-col items-center group transition-all hover:-translate-y-1">
+                                <div className="transition-transform group-hover:scale-105 shadow-sm">
                                    <CategoryIcon name={cat.name} />
                                 </div>
-                                <span className="font-semibold text-gray-800 mt-4">{cat.name}</span>
+                                <span className="text-xs md:text-sm text-gray-700 mt-1 font-medium group-hover:text-cyan-600">{cat.name}</span>
                             </button>
                         ))}
                     </div>
                 </div>
             </section>
 
+            {/* Banner Strip */}
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+                <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg p-4 flex items-center justify-between shadow-md cursor-pointer" onClick={() => onNavigate('login')}>
+                    <div className="flex items-center gap-4">
+                        <div className="bg-red-600 text-white font-bold px-3 py-1 rounded text-sm animate-pulse">ใหม่</div>
+                        <span className="text-white font-medium text-sm md:text-base truncate">สมัครสมาชิก Loma Card วันนี้ รับส่วนลดเพิ่มทันที 150 บาท</span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+                </div>
+            </div>
 
-            {/* Featured Products Section */}
-            <section className="py-16 md:py-20 bg-gray-50">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-extrabold text-gray-900">สินค้าแนะนำจากชุมชน</h2>
-                        <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-600">ผลิตภัณฑ์เด่นที่เราคัดสรรมาเพื่อคุณโดยเฉพาะ</p>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                    {featuredProducts.map(product => (
-                        <ProductCard key={product.id} product={product} onSelect={onSelectProduct} onQuickView={onQuickView} />
-                    ))}
-                    </div>
-                    <div className="text-center mt-12">
-                        <button onClick={() => onNavigate('all-products')} className="px-8 py-3 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 transition-colors duration-300 shadow-lg shadow-red-500/40">
-                            ดูสินค้าทั้งหมด
+            {/* Flash Sale Section */}
+            <section className="container mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+                <div className="bg-white rounded-lg shadow-sm p-4">
+                    <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-xl font-extrabold text-red-600 italic uppercase tracking-wider">Flash Sale</h2>
+                            <div className="hidden md:flex items-center gap-1">
+                                <span className="bg-black text-white px-2 py-0.5 text-xs font-bold rounded">{time.h}</span>
+                                <span className="text-black font-bold">:</span>
+                                <span className="bg-black text-white px-2 py-0.5 text-xs font-bold rounded">{time.m}</span>
+                                <span className="text-black font-bold">:</span>
+                                <span className="bg-black text-white px-2 py-0.5 text-xs font-bold rounded">{time.s}</span>
+                            </div>
+                        </div>
+                        <button onClick={() => onNavigate('all-products')} className="text-red-600 text-sm font-medium hover:underline flex items-center">
+                            ดูทั้งหมด
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
                         </button>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        {flashSaleProducts.map(product => (
+                            <ProductCard key={`flash-${product.id}`} product={product} onSelect={onSelectProduct} onQuickView={onQuickView} />
+                        ))}
                     </div>
                 </div>
             </section>
             
-            {/* Why Choose Us Section */}
-            <section className="bg-white">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-                    <div className="grid md:grid-cols-3 gap-8 text-center max-w-5xl mx-auto">
-                       {valueProps.map(prop => (
-                           <div key={prop.title} className="flex flex-col items-center">
-                               <div className="bg-red-100 p-4 rounded-full">
-                                   {prop.icon}
-                               </div>
-                               <h3 className="text-xl font-bold text-gray-900 mt-4">{prop.title}</h3>
-                               <p className="text-gray-600 mt-2">{prop.description}</p>
-                           </div>
-                       ))}
+            {/* Daily Discover (Infinite Grid Style) */}
+            <section className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-center mb-6 relative">
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center">
+                        <span className="px-6 py-2 bg-gray-100 text-lg font-bold text-cyan-700 uppercase tracking-wide">สินค้าแนะนำประจำวัน</span>
                     </div>
                 </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+                    {recommendedProducts.map(product => (
+                        <ProductCard key={product.id} product={product} onSelect={onSelectProduct} onQuickView={onQuickView} />
+                    ))}
+                </div>
+                
+                <div className="mt-8 text-center">
+                    <button onClick={() => onNavigate('all-products')} className="bg-white border border-gray-300 text-gray-700 font-medium py-2 px-10 rounded hover:bg-gray-50 hover:text-cyan-600 hover:border-cyan-600 transition-all">
+                        ดูเพิ่มเติม
+                    </button>
+                </div>
             </section>
-        </>
+        </div>
     );
 }
 

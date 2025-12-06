@@ -9,9 +9,12 @@ import CartPage from './pages/Cart.tsx';
 import About from './pages/About.tsx';
 import Stories from './pages/Stories.tsx';
 import Confirmation from './pages/Confirmation.tsx';
+import SellerCentre from './pages/SellerCentre.tsx';
+import HelpCenter from './pages/HelpCenter.tsx';
+import { Login, Profile } from './pages/Auth.tsx';
 import QuickViewModal from './components/QuickViewModal.tsx';
 import ToastContainer from './components/ToastContainer.tsx';
-import { Product, Page, CartItem, SortOption } from './types.ts';
+import { Product, Page, CartItem, SortOption, User } from './types.ts';
 import { useToast } from './hooks/useToast.ts';
 
 const App: React.FC = () => {
@@ -22,7 +25,9 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
+  const [selectedProducers, setSelectedProducers] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<SortOption>('default');
+  const [user, setUser] = useState<User | null>(null);
   const addToast = useToast();
 
   const handleNavigate = (page: Page) => {
@@ -34,9 +39,24 @@ const App: React.FC = () => {
       setSearchQuery('');
       setSelectedCategories([]);
       setSelectedProvinces([]);
+      setSelectedProducers([]);
       setSortOption('default');
     }
     window.scrollTo(0, 0);
+  };
+
+  const handleLogin = (loggedInUser: User) => {
+      setUser(loggedInUser);
+  };
+
+  const handleLogout = () => {
+      setUser(null);
+      addToast({
+          type: 'info',
+          title: 'ออกจากระบบ',
+          message: 'คุณได้ออกจากระบบเรียบร้อยแล้ว'
+      });
+      handleNavigate('home');
   };
 
   const handleSelectProduct = (product: Product) => {
@@ -67,6 +87,7 @@ const App: React.FC = () => {
     setSearchQuery('');
     setSelectedCategories([category]);
     setSelectedProvinces([]);
+    setSelectedProducers([]);
     setCurrentPage('all-products');
     window.scrollTo(0, 0);
   };
@@ -89,7 +110,6 @@ const App: React.FC = () => {
       }
       return [...prevItems, { ...product, quantity }];
     });
-    // FIX: Removed `id` property as it's handled by the context provider.
     addToast({
         type: 'success',
         title: 'เพิ่มสินค้าสำเร็จ!',
@@ -113,6 +133,15 @@ const App: React.FC = () => {
   };
 
   const handleCheckout = () => {
+    if (!user) {
+        addToast({
+            type: 'error',
+            title: 'กรุณาเข้าสู่ระบบ',
+            message: 'คุณต้องเข้าสู่ระบบก่อนทำการชำระเงิน',
+        });
+        handleNavigate('login');
+        return;
+    }
     setCartItems([]);
     handleNavigate('confirmation');
   };
@@ -651,11 +680,14 @@ const App: React.FC = () => {
     let filtered = allProducts;
 
     if (searchQuery) {
+        const query = searchQuery.toLowerCase();
         filtered = filtered.filter(p => 
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.story.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.province.toLowerCase().includes(searchQuery.toLowerCase())
+            p.name.toLowerCase().includes(query) ||
+            p.story.toLowerCase().includes(query) ||
+            p.longStory.toLowerCase().includes(query) ||
+            p.producer.toLowerCase().includes(query) ||
+            p.category.toLowerCase().includes(query) ||
+            p.province.toLowerCase().includes(query)
         );
     }
 
@@ -665,6 +697,10 @@ const App: React.FC = () => {
     
     if (selectedProvinces.length > 0) {
       filtered = filtered.filter(p => selectedProvinces.includes(p.province));
+    }
+    
+    if (selectedProducers.length > 0) {
+      filtered = filtered.filter(p => selectedProducers.includes(p.producer));
     }
     
     const getPriceValue = (price: string) => parseFloat(price.replace(/[^0-9.-]+/g,""));
@@ -677,10 +713,11 @@ const App: React.FC = () => {
       default:
         return filtered;
     }
-  }, [allProducts, selectedCategories, selectedProvinces, sortOption, searchQuery]);
+  }, [allProducts, selectedCategories, selectedProvinces, selectedProducers, sortOption, searchQuery]);
 
   const allCategories = useMemo(() => [...new Set(allProducts.map(p => p.category))].sort(), [allProducts]);
   const allProvinces = useMemo(() => [...new Set(allProducts.map(p => p.province))].sort(), [allProducts]);
+  const allProducers = useMemo(() => [...new Set(allProducts.map(p => p.producer))].sort(), [allProducts]);
 
   const renderPage = () => {
     const pageContent = () => {
@@ -696,18 +733,21 @@ const App: React.FC = () => {
                       onClearSearch={handleClearSearch}
                       allCategories={allCategories}
                       allProvinces={allProvinces}
+                      allProducers={allProducers}
                       selectedCategories={selectedCategories}
                       selectedProvinces={selectedProvinces}
+                      selectedProducers={selectedProducers}
                       sortOption={sortOption}
                       onCategoryChange={(c) => setSelectedCategories(c)}
                       onProvinceChange={(p) => setSelectedProvinces(p)}
+                      onProducerChange={(p) => setSelectedProducers(p)}
                       onSortChange={(s) => setSortOption(s)}
                   />;
         case 'product-detail':
           if (selectedProduct) {
             return <ProductDetail product={selectedProduct} onBack={handleBackToList} onSelectProduct={handleSelectProduct} allProducts={allProducts} onAddToCart={handleAddToCart} onQuickView={handleOpenQuickView} />;
           }
-          return <AllProducts products={filteredAndSortedProducts} onSelectProduct={handleSelectProduct} onQuickView={handleOpenQuickView} searchQuery={searchQuery} onClearSearch={handleClearSearch} allCategories={allCategories} allProvinces={allProvinces} selectedCategories={selectedCategories} selectedProvinces={selectedProvinces} sortOption={sortOption} onCategoryChange={setSelectedCategories} onProvinceChange={setSelectedProvinces} onSortChange={setSortOption} />;
+          return <AllProducts products={filteredAndSortedProducts} onSelectProduct={handleSelectProduct} onQuickView={handleOpenQuickView} searchQuery={searchQuery} onClearSearch={handleClearSearch} allCategories={allCategories} allProvinces={allProvinces} allProducers={allProducers} selectedCategories={selectedCategories} selectedProvinces={selectedProvinces} selectedProducers={selectedProducers} sortOption={sortOption} onCategoryChange={setSelectedCategories} onProvinceChange={setSelectedProvinces} onProducerChange={setSelectedProducers} onSortChange={setSortOption} />;
         case 'cart':
           return <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateCartQuantity} onRemoveItem={handleRemoveFromCart} onNavigate={handleNavigate} onCheckout={handleCheckout} />;
         case 'stories':
@@ -716,6 +756,14 @@ const App: React.FC = () => {
           return <About onNavigate={handleNavigate} />;
         case 'confirmation':
           return <Confirmation onNavigate={handleNavigate} />;
+        case 'seller':
+          return <SellerCentre onNavigate={handleNavigate} />;
+        case 'help':
+            return <HelpCenter />;
+        case 'login':
+            return <Login onLogin={handleLogin} onNavigate={handleNavigate} />;
+        case 'profile':
+            return <Profile user={user} onNavigate={handleNavigate} onLogout={handleLogout} />;
         default:
           return <Home onNavigate={handleNavigate} onSelectProduct={handleSelectProduct} allProducts={allProducts} onCategorySelect={handleCategorySelect} onQuickView={handleOpenQuickView} />;
       }
@@ -726,7 +774,13 @@ const App: React.FC = () => {
   return (
     <>
       <div className="bg-white text-gray-800 flex flex-col min-h-screen antialiased">
-        <Header onNavigate={handleNavigate} cartItemCount={cartItems.length} onSearch={handleSearch} />
+        <Header 
+            onNavigate={handleNavigate} 
+            cartItemCount={cartItems.length} 
+            onSearch={handleSearch} 
+            user={user}
+            onLogout={handleLogout}
+        />
         <main className="flex-grow">
           {renderPage()}
         </main>

@@ -1,3 +1,4 @@
+
 export interface Product {
   id: number;
   name: string;
@@ -16,7 +17,14 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
-export type Page = 'home' | 'all-products' | 'product-detail' | 'cart' | 'stories' | 'about' | 'confirmation';
+export interface User {
+  name: string;
+  email: string;
+  avatar?: string;
+  role: 'user' | 'seller';
+}
+
+export type Page = 'home' | 'all-products' | 'product-detail' | 'cart' | 'stories' | 'about' | 'confirmation' | 'login' | 'profile' | 'seller' | 'help';
 
 export type SortOption = 'default' | 'price-asc' | 'price-desc';
 
